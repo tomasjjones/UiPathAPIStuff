@@ -11,27 +11,7 @@ Imports Newtonsoft.Json
 Module Module1
 
     Sub Main()
-
-        Dim strBearerToken As String = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlJUTkVOMEl5T1RWQk1UZEVRVEEzUlRZNE16UkJPVU00UVRRM016TXlSalUzUmpnMk4wSTBPQSJ9.eyJodHRwczovL3VpcGF0aC9lbWFpbCI6InRqb25lc0Byb2JpcXVpdHkuY29tIiwiaHR0cHM6Ly91aXBhdGgvZW1haWxfdmVyaWZpZWQiOnRydWUsImlzcyI6Imh0dHBzOi8vYWNjb3VudC51aXBhdGguY29tLyIsInN1YiI6Im9hdXRoMnxVaVBhdGgtQUFEVjJ8ZDMyNjE4ZDQtMmIwMC00MWJhLThjMTYtYTc5NTRlY2Q0Mjg0IiwiYXVkIjpbImh0dHBzOi8vb3JjaGVzdHJhdG9yLmNsb3VkLnVpcGF0aC5jb20iLCJodHRwczovL3VpcGF0aC5ldS5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNjQ5NjY5MTY4LCJleHAiOjE2NDk3NTU1NjgsImF6cCI6IjhERXYxQU1OWGN6VzN5NFUxNUxMM2pZZjYyaks5M241Iiwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCBvZmZsaW5lX2FjY2VzcyJ9.TidZ_4UJXtWJ7nIpGZEy7WfFQYOSPA51e4Q2JodCgRr8kz72yiEbYbVjsvcbNlOop005QwqvfJ-5OM6P3b_U4Tev3XWwDVvPZ4PvzJ-jTl_j4MBiKGIIyJSftW-IRwgSoBZUrOz6XRxu8sz0S8NRdyMKQe-H_AQQaqh4OUxxMyxOcPKUZ4-_4GeC_dtkXhzcZNK2PZSKBqoRfg-8q6aFSfU1Ea30CmEXsa4xDzPGZ05HevqvwuJVAQ8zm_bmvZLyae7X6EU3FyvZJWua3oacp7MDurlokoZtl97EsTMWmmeSGv1CfBwb2PaPoVrU1b70d3BqH9AHDhdFT7g1uxCrMQ"
-        'AddQueueItem(strBearerToken)
-
-        'Call GetQueueItem
-        Dim strQueueItemResponse As String = GetQueueItem(strBearerToken)
-
-        Console.WriteLine(strQueueItemResponse)
-
-        Call DeserialiseJSON(strQueueItemResponse)
-
-
-
-        End
-
-        If strQueueItemResponse.Contains("@odata.count") Then
-            Console.WriteLine("Queue Data Recieved")
-        End If
-
-        Dim strPattern As String = """QueueDefinitionId"":((?:(?!,)\d)*).*?""Status"":""((?:(?!,).)*)"",.*?""Key"":""((?:(?!,).)*)"",.*?""ProcessingExceptionType"":((?:(?!,).)*),.*?""Email"":""((?:(?!,).)*)"".*?""Name"":""((?:(?!,).)*)"""
-        Call RegexDataSort(strQueueItemResponse, strPattern)
+        OrchAPI.Liam()
 
     End Sub
 

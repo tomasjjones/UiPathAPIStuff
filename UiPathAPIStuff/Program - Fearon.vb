@@ -6,27 +6,38 @@ Imports System.Text.RegularExpressions
 Imports Newtonsoft.Json
 Imports Nancy.Json
 
-Module Module2
+Module OrchAPI
 
     Sub Liam()
+        Dim strClientID As String = "8DEv1AMNXczW3y4U15LL3jYf62jK93n5"
+        Dim strRefreshToken As String = "D6FujDr96mxqZKR8vXfwOt24ONQMp6Pr7Ht59jkRSoKhV"
+        Dim strTenantName As String = "DefaultTenant"
 
-        Dim res = GetToken()
-        Console.WriteLine(res)
+        Console.WriteLine(GetToken(strClientID, strRefreshToken, strTenantName))
+
 
     End Sub
 
-    Function GetToken() As String
-        Dim myReq As Net.HttpWebRequest = HttpWebRequest.Create("https://account.uipath.com/oauth/token")
-        myReq.Method = "POST"
-        myReq.ContentType = "application/json"
-        myReq.Timeout = 1000
-        myReq.Headers.Add("X-UIPATH-TenantName", "DefaultTenant")
+    ''' <summary>
+    ''' Taking a users API credentials (Found in orchestrator), a bearer token is recovered for use in further API calls that require authentication as a String
+    ''' </summary>
+    ''' <param name="ClientID"></param>
+    ''' <param name="RefreshToken"></param>
+    ''' <param name="TenantName"></param>
+    ''' <returns></returns>
+    Function GetToken(ClientID As String, RefreshToken As String, TenantName As String) As String
+        Dim myReq As Net.HttpWebRequest = HttpWebRequest.Create("https://account.uipath.com/oauth/token") ' Generic request address for users
+        myReq.Method = "POST"                                                                             ' Call type
+        myReq.ContentType = "application/json"                                                            ' Response format
+        myReq.Timeout = 5000                                                                              ' Timeout value
+        myReq.Headers.Add("X-UIPATH-TenantName", TenantName)                                              ' Required header for call
 
+        'Building body of call
         Dim PostString As String
         PostString = "{
                 ""grant_type"": ""refresh_token"",
-                ""client_id"": ""8DEv1AMNXczW3y4U15LL3jYf62jK93n5"",
-                ""refresh_token"": ""D6FujDr96mxqZKR8vXfwOt24ONQMp6Pr7Ht59jkRSoKhV""
+                ""client_id"": " + """" + ClientID + """" + ",
+                ""refresh_token"": " + """" + RefreshToken + """" + "
         }"
 
         Dim byteArray As Byte() = Encoding.UTF8.GetBytes(PostString)
@@ -37,19 +48,24 @@ Module Module2
         dataStream.Write(byteArray, 0, byteArray.Length)
         dataStream.Close()
 
-        Dim response As HttpWebResponse = CType(myReq.GetResponse(), HttpWebResponse)
-        Dim receiveStream As Stream = response.GetResponseStream()
-        Dim readStream As New StreamReader(receiveStream, Encoding.UTF8)
-        Dim res = readStream.ReadToEnd()
+        Try
+            Debug.WriteLine("Sending API request for bearer token")
+            Dim response As HttpWebResponse = CType(myReq.GetResponse(), HttpWebResponse)
+            Dim receiveStream As Stream = response.GetResponseStream()
+            Dim readStream As New StreamReader(receiveStream, Encoding.UTF8)
+            Dim res = readStream.ReadToEnd()
 
-        response.Close()
-        readStream.Close()
+            response.Close()
+            readStream.Close()
 
-        Dim j As Object = New JavaScriptSerializer().Deserialize(Of Object)(res)
-        GetToken = j("access_token")
+            Debug.WriteLine("Request sent")
+            Dim j As Object = New JavaScriptSerializer().Deserialize(Of Object)(res)
 
-        Return j("access_token")
-
+            Return j("access_token")
+        Catch ex As Exception
+            Debug.WriteLine("GetToken failed: " + ex.Message)
+            Throw
+        End Try
     End Function
 
 
@@ -176,4 +192,36 @@ Module Module2
     End Sub
 
 
+
+
 End Module
+
+
+
+
+
+
+
+
+
+'Old Main
+'Dim strBearerToken As String = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlJUTkVOMEl5T1RWQk1UZEVRVEEzUlRZNE16UkJPVU00UVRRM016TXlSalUzUmpnMk4wSTBPQSJ9.eyJodHRwczovL3VpcGF0aC9lbWFpbCI6InRqb25lc0Byb2JpcXVpdHkuY29tIiwiaHR0cHM6Ly91aXBhdGgvZW1haWxfdmVyaWZpZWQiOnRydWUsImlzcyI6Imh0dHBzOi8vYWNjb3VudC51aXBhdGguY29tLyIsInN1YiI6Im9hdXRoMnxVaVBhdGgtQUFEVjJ8ZDMyNjE4ZDQtMmIwMC00MWJhLThjMTYtYTc5NTRlY2Q0Mjg0IiwiYXVkIjpbImh0dHBzOi8vb3JjaGVzdHJhdG9yLmNsb3VkLnVpcGF0aC5jb20iLCJodHRwczovL3VpcGF0aC5ldS5hdXRoMC5jb20vdXNlcmluZm8iXSwiaWF0IjoxNjQ5NjY5MTY4LCJleHAiOjE2NDk3NTU1NjgsImF6cCI6IjhERXYxQU1OWGN6VzN5NFUxNUxMM2pZZjYyaks5M241Iiwic2NvcGUiOiJvcGVuaWQgcHJvZmlsZSBlbWFpbCBvZmZsaW5lX2FjY2VzcyJ9.TidZ_4UJXtWJ7nIpGZEy7WfFQYOSPA51e4Q2JodCgRr8kz72yiEbYbVjsvcbNlOop005QwqvfJ-5OM6P3b_U4Tev3XWwDVvPZ4PvzJ-jTl_j4MBiKGIIyJSftW-IRwgSoBZUrOz6XRxu8sz0S8NRdyMKQe-H_AQQaqh4OUxxMyxOcPKUZ4-_4GeC_dtkXhzcZNK2PZSKBqoRfg-8q6aFSfU1Ea30CmEXsa4xDzPGZ05HevqvwuJVAQ8zm_bmvZLyae7X6EU3FyvZJWua3oacp7MDurlokoZtl97EsTMWmmeSGv1CfBwb2PaPoVrU1b70d3BqH9AHDhdFT7g1uxCrMQ"
+''AddQueueItem(strBearerToken)
+
+''Call GetQueueItem
+'Dim strQueueItemResponse As String = GetQueueItem(strBearerToken)
+
+'Console.WriteLine(strQueueItemResponse)
+
+'Call DeserialiseJSON(strQueueItemResponse)
+
+
+
+'End
+
+'If strQueueItemResponse.Contains("@odata.count") Then
+'Console.WriteLine("Queue Data Recieved")
+'End If
+
+'Dim strPattern As String = """QueueDefinitionId"":((?:(?!,)\d)*).*?""Status"":""((?:(?!,).)*)"",.*?""Key"":""((?:(?!,).)*)"",.*?""ProcessingExceptionType"":((?:(?!,).)*),.*?""Email"":""((?:(?!,).)*)"".*?""Name"":""((?:(?!,).)*)"""
+'Call RegexDataSort(strQueueItemResponse, strPattern)
